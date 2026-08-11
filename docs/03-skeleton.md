@@ -156,6 +156,42 @@ engine's own lookup is `Rig::BoneIndexFromNameHash`, retail impl `0x0A85F0F0`
 via thunk `0x00CF90F0`, signature `u16(Rig* rcx, u32 crc32 edx)`, returning
 `0xFFFF` on a miss.
 
+### A node index is not stable for a character, and must not be cached
+
+`[VERIFIED, 2026-08 update build]` **Resolve the hash to a node index every time
+you need it. Do not cache the result, not even against a fixed skeleton
+pointer.**
+
+Observed on the player character, one second apart, from a 1 Hz re-resolve that
+logs only on change. Same skeleton pointer both times, different node index for
+`CRC32("Head")`:
+
+```
+[11:09:35.759] player BODY skeleton 0x021A3D8FD110, Head bone node 60 (1 skeleton(s) on this entity)
+[11:09:36.784] player BODY skeleton 0x021A3D8FD110, Head bone node 59 (1 skeleton(s) on this entity)
+```
+
+The lookup path was skeleton pointer, then the rig pointer read out of that
+skeleton, then a name-map search on that rig. Since the skeleton pointer did not
+change, either the skeleton was rebound to a different rig, or the map it was
+searched against changed underneath it. Both are consistent with the rig
+identifying the skeleton **class** rather than the individual character, as
+described above.
+
+`[UNKNOWN]` Which of the two it was, and what triggers it. The sample was taken
+seconds after the character spawned into the world, so character assembly, a
+loadout or gear change, and an LOD transition are all plausible and none is
+established. The node records carry LOD bits at `+0xA` and there is a per-bone
+LOD override list at `[skel+0x2C8]`, so an LOD-driven remap is the obvious
+candidate to test first.
+
+The practical consequence stands regardless of mechanism, and it is the reason
+this is worth writing down: code that resolves `Head` once at spawn and caches
+the index will silently read **the wrong bone** afterwards. It will not error,
+because the stale index is still a valid index into the bone buffer. Anything
+built on a cached node index needs a plausibility check on the resulting
+transform, or it will drive a limb where it meant to drive a head.
+
 The instance-pool helper is `0x60` bytes with a 64-slot pool (one `0x1808`
 allocation of 64 x `0x60`), free-list head at `+0x50`, active-list sentinel at
 `+0x58`, slots linked by next at `slot+0x48` and prev at `slot+0x40`. So up to
