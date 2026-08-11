@@ -154,7 +154,7 @@ anchored to the character's animated head bone.
 
 Status at the time of writing: playable in alpha, with a headset-confirmed
 result that as far as this research could establish **has no prior art on this
-engine family** — the in-game weapon follows the motion controller 1:1 in
+engine family**: the in-game weapon follows the motion controller 1:1 in
 position and rotation, driven by a bone write at the engine's own attachment
 publish. The honest gap, documented rather than glossed: bullets still follow the
 camera rather than the gun. That work is ongoing.
