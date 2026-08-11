@@ -20,7 +20,7 @@ before those changes while still being recognisably the same engine.
 
 **This is best-effort reverse engineering. It is not documentation from Ubisoft,
 it has not been reviewed by anyone with access to the source, and parts of it
-are certainly wrong.**
+are may not be 100% accurate, but this is an ongoing research project.**
 
 Read it in that spirit:
 
