@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/09-methodology.md) · [한국어](ko/09-methodology.md)
+
+---
+
 # 09 - Methodology: what actually worked
 
 Techniques, in roughly the order they are worth trying on this engine. Most

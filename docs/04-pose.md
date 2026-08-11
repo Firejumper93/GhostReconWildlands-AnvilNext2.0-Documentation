@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/04-pose.md) · [한국어](ko/04-pose.md)
+
+---
+
 # 04 - The Pose object and the real bone layout
 
 This is the part of the engine that decides where a character's bones actually

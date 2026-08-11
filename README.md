@@ -1,3 +1,13 @@
+<div align="center">
+
+**🌐 Language · Sprache · 언어**
+
+**English** · [Deutsch](README.de.md) · [한국어](README.ko.md)
+
+</div>
+
+---
+
 # Ghost Recon Wildlands / AnvilNext 2.0 engine documentation
 
 Reverse-engineering notes on Ubisoft's AnvilNext 2.0 as shipped in *Tom Clancy's

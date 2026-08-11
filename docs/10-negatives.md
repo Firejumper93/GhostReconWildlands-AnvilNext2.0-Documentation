@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/10-negatives.md) · [한국어](ko/10-negatives.md)
+
+---
+
 # 10 - Verified negatives
 
 Things that are definitively **not** true, and approaches that definitively do

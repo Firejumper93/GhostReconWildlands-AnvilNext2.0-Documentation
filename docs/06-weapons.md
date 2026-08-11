@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/06-weapons.md) · [한국어](ko/06-weapons.md)
+
+---
+
 # 06 - Weapons and the attachment system
 
 RVAs in this file are from the **2026-08 update build** unless marked retail.

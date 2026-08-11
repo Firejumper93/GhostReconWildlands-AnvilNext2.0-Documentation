@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/01-binary.md) · [한국어](ko/01-binary.md)
+
+---
+
 # 01 - The binary
 
 ## PE facts

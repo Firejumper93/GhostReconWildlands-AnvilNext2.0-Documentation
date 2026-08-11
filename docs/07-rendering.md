@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/07-rendering.md) · [한국어](ko/07-rendering.md)
+
+---
+
 # 07 - How geometry is actually placed and drawn
 
 Everything in this file was recovered from **the game's own shipped shaders**,

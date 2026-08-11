@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/02-formats.md) · [한국어](ko/02-formats.md)
+
+---
+
 # 02 - Archive and data-file formats
 
 Everything here is `[VERIFIED]` against the shipped Wildlands archives, at the

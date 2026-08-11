@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/08-reflection.md) · [한국어](ko/08-reflection.md)
+
+---
+
 # 08 - The reflection tables, and recovering engine names
 
 This is the single highest-leverage technique on this engine, so it gets its own

@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/05-camera.md) · [한국어](ko/05-camera.md)
+
+---
+
 # 05 - The camera
 
 All RVAs in this file are the 2017-era retail build unless stated.

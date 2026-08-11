@@ -1,3 +1,7 @@
+**English** · [Deutsch](de/03-skeleton.md) · [한국어](ko/03-skeleton.md)
+
+---
+
 # 03 - Skeletons, rigs and bone naming
 
 ## Bone identity is CRC32, everywhere
