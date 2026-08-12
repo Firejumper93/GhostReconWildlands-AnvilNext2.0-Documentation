@@ -201,6 +201,24 @@ records at stride `0x30`, which makes it look exactly like the palette producer.
 It is not: its layout is `{float3 T, float3 A, float3 B, float3 AxB}` with the
 translation at floats 0..2, **not** in the `.w` lanes.
 
+## Per-part visibility is transition-driven
+
+`[VERIFIED]` Character parts (established for the head attachment family) carry
+a per-object hidden flag, flipped by a single setter the engine owns. The fact
+that matters to anyone instrumenting it: **the setter runs on state
+transitions, not per frame.** Hooked across 12 seconds of continuous
+first-person play it was never called once; the first aim transition then
+produced a burst of calls.
+
+Two consequences. A hook on the setter costs nothing at frame rate, because
+there is no per-frame traffic to intercept. And the only reliable way to learn
+which object is a given part is to observe the engine's own call at a
+transition: until the first transition of a session there is nothing to latch,
+so anything that forces a part hidden by re-driving the setter shows the part
+visible until the first transition happens. Re-deriving the object pointer by
+any other route means guessing at object identity, and the flag bit does not
+generalise across part families (see the negative below).
+
 ## Where hooking draws is done
 
 `[VERIFIED]` Vtable patching is the wrong layer for D3D11 draws on this target,
