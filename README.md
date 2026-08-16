@@ -322,7 +322,8 @@ Notes and prose: **CC BY-NC 4.0**. Attribute, share and build on freely.
 subscription-gated builds, and sold or rented early access.
 
 Two honest limits on that, because the licence protects less than it looks
-like it does. Versions published earlier were **CC BY 4.0** and that grant
+like it does, and both are set out in [LICENSE-NOTES.md](LICENSE-NOTES.md).
+Versions published earlier were **CC BY 4.0** and that grant
 is irrevocable for those versions. And copyright covers the way this is
 WRITTEN, not the facts in it: an offset, a struct layout or a bone name is
 a fact about a program, and anyone may read it here and use it anywhere.

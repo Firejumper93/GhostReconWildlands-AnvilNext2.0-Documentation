@@ -405,37 +405,3 @@ the avoidance of doubt, this paragraph does not form part of the
 public licenses.
 
 Creative Commons may be contacted at creativecommons.org.
-
-=======================================================================
-
-Copyright (c) 2026 Firejumper93
-
-NOTES ON WHAT THIS LICENCE DOES AND DOES NOT DO
-
-Read these before relying on the licence, because it protects less than it
-looks like it protects.
-
-1. PRIOR VERSIONS STAY CC BY 4.0. This repository was published under CC BY 4.0,
-   which permits commercial use. That grant is irrevocable for the versions
-   already released under it. This licence binds material published from the
-   change onward; it cannot claw back what was already out.
-
-2. FACTS ARE NOT COPYRIGHTABLE. Copyright covers the way this documentation is
-   WRITTEN: its prose, its explanations, the selection and arrangement of its
-   tables. It does not cover the underlying facts. A byte offset, a struct
-   layout, a function signature or a bone name is a fact about a program, and
-   anyone may read it here and use it anywhere, including in a paid mod,
-   whatever this licence says. What the licence stops is copying the text.
-
-3. WHAT NONCOMMERCIAL MEANS HERE. Paid mods, paywalled or subscription-gated
-   builds, and sold or rented early access are commercial uses. If you are
-   unsure, ask rather than guess.
-
-4. THIS IS DOCUMENTATION, NOT SOFTWARE. Creative Commons licences are not
-   intended for source code. The VR mod this documentation came from is covered
-   separately by its own terms.
-
-5. NO GAME CODE OR GAME DATA IS INCLUDED OR REDISTRIBUTED HERE. Ghost Recon,
-   Wildlands, AnvilNext and Anvil are trademarks of Ubisoft Entertainment. This
-   is unofficial documentation produced by interoperability analysis and is not
-   affiliated with or endorsed by Ubisoft.
