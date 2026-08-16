@@ -180,8 +180,8 @@ completely inert.
 > **The lesson is about the shape of the search, not its size.** The negative
 > below was produced by an exhaustive enumeration of the right kind of thing.
 > The answer was a different kind of thing. Enumerating a category completely
-> tells you nothing about what lives outside the category, and a negative is
-> only as strong as the assumption about where the answer would have to be.
+> tells you nothing about what lives outside it, and a negative is only ever as
+> strong as the assumption about where the answer would have to live.
 >
 > The searches described below were all real and all correctly executed. They
 > are left in place because they are still useful as a record of where the

@@ -90,7 +90,8 @@ if (kind & 0xFFFF) return false;    // wrong
 
 **The low half of `+0x0C` is an ELEMENT COUNT for array properties**, proved by
 two independent closure checks. That one line was silently deleting **3,879 real
-records** image-wide. If you write a walker, treat `+0x0C` as a kind in the high
+records** image-wide: a single condition, written once and never revisited, was
+quietly eating a fifth of the answer. If you write a walker, treat `+0x0C` as a kind in the high
 half and a count in the low half, and do not reject on the count.
 
 Record totals after both fixes, on the Last Rites build:

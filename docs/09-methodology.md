@@ -121,6 +121,9 @@ invented.
 > the METHOD is wrong. It never licenses a theory about why the target is
 > special.**
 
+The disassembler is honest. The reader is the unreliable narrator, and every
+error in this repository has been the reader's.
+
 ## Use `.pdata`, not backward disassembly
 
 To find a function's start from an address inside it, look it up in the

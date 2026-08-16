@@ -219,9 +219,10 @@ CRC cracking and no collision risk.
 
 `[VERIFIED]` Two consequences worth knowing before building on the anchors.
 **The unsilenced muzzle anchor and the aiming point resolve to the same bone**,
-so a direction built from one to the other is a zero vector. And the silenced
-muzzle bone exists on **3 of 3,607** weapon assets, all miniguns, so on a
-silenced weapon that lookup cannot succeed.
+so a direction built from one to the other is a vector of length zero, and
+always was. And the silenced muzzle bone exists on **three of three thousand six
+hundred and seven** weapon assets, every one of them a minigun, so on a silenced
+weapon that lookup cannot succeed at all.
 
 `[VERIFIED]` The aiming point is **the sight, not the bore**. On one assault
 rifle the bore sits at `z = -0.0628`, the iron sight line at `z = -0.0024`, and

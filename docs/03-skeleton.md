@@ -290,6 +290,9 @@ resolved and 0 when not. Test validity the way the engine does.
 > an exchange and a decrement. Copying sixteen bytes over a live handle leaks the
 > old referent or double-frees it. Never `memcpy` a `BoneHandle`; assign through
 > the engine's own operator, or leave it alone.
+>
+> A handle here is a promise to look something up later, and the promise is
+> refcounted. Treating it as sixteen loose bytes is how that promise gets broken.
 
 ### Weapon rig bones
 
