@@ -56,6 +56,71 @@ Never fall back to a hardcoded address from a different build. Some frameworks
 return a stale fallback on a signature miss and the caller uses it unchecked,
 which turns a game update into a crash instead of a clean refusal.
 
+## The closure check: a recovered name is bound to a hash, not to a layout
+
+This one cost roughly five test builds and nine days, and the test that catches
+it is one line.
+
+**A class name recovered by CRC32 is bound to a HASH. It is not bound to a
+memory layout.** Those are two separate lookups, and the second can silently
+attach a correctly recovered name to somebody else's property table.
+
+> **Before attributing any offset to a name, print the whole chain, hash to
+> descriptor to table to the exact `nprops` records. Then check: every claimed
+> property offset must fit inside that class's own recorded instance size, and
+> the number of records claimed must equal `nprops`. A layout that does not fit
+> its own class size is a binding error, not a discovery.**
+
+Applied to the case in [06-weapons.md](06-weapons.md): the class was recorded as
+size `0xB0` while the claimed layout used `+0xF0`, `+0x100` and `+0x124`. Three
+offsets past the end of the object. That is detectable in the time it takes to
+read one line of a dump, and nobody read it for nine days, because the field
+names were plausible, the offsets were real, and every value read off them
+behaved exactly as the names suggested.
+
+Three corollaries, each paid for separately.
+
+**Corroboration must attach to the claim's subject, not to a passenger.** The
+spawn function allocated `0x180` bytes, matching the recorded instance size, and
+that was written down as independent confirmation of the class **identity**. It
+only ever confirmed the **size**, which was not the disputed term. State
+explicitly which part of a claim an independent measurement actually touches.
+
+**Adjacency is not membership.** The same paragraph that misattributed the
+projectile also fused two unrelated classes into one imagined "ray settings
+class", because their property names appeared near each other in a dump. They
+had different descriptors, different tables, different base classes and
+different sizes, and the three floats filled a `0x20` byte struct completely, so
+there was no room for the vectors claimed to sit alongside them at `+0x20` and
+`+0x30`. Same defect, same paragraph, undetected for the same nine days.
+
+**When a lookup returns nothing, suspect the method before inventing a property
+of the target.** When the fabricated class had no findable property table, the
+note written down was "its table has zero references because these descriptors
+are built at runtime, so the static route is closed". The specific address named
+was not a table at all, and both of the real tables were ordinary static ones the
+same tool had already dumped, so as an explanation for THAT lookup it was
+invented.
+
+> **And then the correction over-reached, which is the more interesting half.**
+> "Descriptors are built at runtime" was dismissed as a fabrication. It is not:
+> this engine really does build part of its reflection data at runtime, by code
+> writing property records into the reflection section as immediate stores.
+> Image-wide there are 35,427 reflection dwords written that way, **27,357 of
+> them zero on disk** and therefore invisible to any purely static dumper. The
+> original note was wrong about the address and right about the mechanism.
+>
+> The lesson is symmetrical and worth more than either half: **a claim can be
+> unsupported and true at the same time.** When you retract something, retract
+> the part the evidence actually reaches. Deciding a mechanism is imaginary
+> because the one address offered for it was wrong is the same error as
+> believing the mechanism because the address looked plausible.
+
+> **A method that cannot find a known answer in a binary where the answer IS
+> known is not evidence about a binary where it is not. A failed control means
+> the METHOD is wrong. It never licenses a theory about why the target is
+> special.**
+
 ## Use `.pdata`, not backward disassembly
 
 To find a function's start from an address inside it, look it up in the

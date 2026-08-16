@@ -244,6 +244,78 @@ hand/weapon-reference set.
 The weapon rig has its own bone prefix, `wb-`: `wb-gunroot`, `wb-ref-anim`
 (`0x8CDA0E3F`), `wb-LightRoot`.
 
+### `BoneHandle`, and why "anchor" is not a subsystem
+
+`[VERIFIED]` A great deal of this engine's spatial wiring is expressed as a
+reflected property of type **`BoneHandle`** (`crc32("BoneHandle") ==
+0xC11EA419`), a **16 byte** object initialised as
+`{qword=-1, int32=-1, u16=0xFFFF}`. 21 properties across the game carry that
+type, named things like `m_GunRootBone` and `m_hFrontWheelSteering`.
+
+Two things follow, and both save time.
+
+**A 16 byte stride does not mean a `float4`.** `GR_cWeaponComponent` carries
+three `BoneHandle`s consecutively at `+0xB0`, `+0xC0` and `+0xD0`, which reads
+exactly like three embedded vectors and is not. The engine has a **separate
+kind** for `float4` (`kind=0x0D`, 397 records) and these are `kind=0x16`; the
+initialiser is three integer stores of `-1` rather than an `xorps`. Writing 16
+bytes over one of them repoints it at a different bone. It does not move a
+position.
+
+**`Anchor` is a naming convention, not a system.** `[VERIFIED]` Ten properties
+in the whole game contain `Anchor`, no class is named `*Anchor*`, and no enum
+contains the word. Five of the six spatial ones are literally `BoneHandle`, and
+the sixth is a raw bone ordinal. So when you meet `m_MuzzleShootAnchor` or
+`m_RightEyeAnchor`, read "a reference to a bone", and expect to find the thing
+you actually want by following it into the table above.
+
+### `BoneHandle` field layout
+
+`[VERIFIED]` Read from the resolver body rather than from samples:
+
+| Offset | Size | Contents |
+|---|---|---|
+| `+0x00` | 8 | pointer to the owning skeleton component, **refcounted** |
+| `+0x08` | 4 | CRC32 of the bone name, `0xFFFFFFFF` when unresolved |
+| `+0x0C` | 2 | bone index in the rig, `0xFFFF` when unresolved |
+| `+0x0E` | 2 | a value copied from the rig, **not a validity flag** |
+
+The resolver takes the name hash at `+0x08` and binary-searches a
+`{u32 key, u16 index}` table to fill `+0x0C`. **The engine's own validity check
+reads `+0x00` and `+0x0C` only, and never touches `+0x0E`.** An earlier reading
+here treated `+0x0E` as a valid flag because two samples happened to show 1 when
+resolved and 0 when not. Test validity the way the engine does.
+
+> **HAZARD. `+0x00` is refcounted.** The assignment operator does an increment,
+> an exchange and a decrement. Copying sixteen bytes over a live handle leaks the
+> old referent or double-frees it. Never `memcpy` a `BoneHandle`; assign through
+> the engine's own operator, or leave it alone.
+
+### Weapon rig bones
+
+`[VERIFIED]` The weapon rig uses the `wb-` prefix and is small, 18 to 21 bones
+in the instances observed. Every weapon carries its own skeleton with bind-pose
+positions inside its own data file, so these are measurable offline for every
+weapon in the game rather than only at runtime.
+
+Names recovered include `wb-gunroot` (bone index 0 on every rig),
+`wb-AimingPoint`, `wb-BarrelEnd`, `wb-muzzle`, `wb-muzzleEnd`, `wb-barrel`,
+`wb-FrontIronsight`, `wb-RearIronsight`, `wb-scope`, `wb-scopeRail`,
+`wb-FlashHider`, `wb-Magazine`, `wb-BoltCarrier`, `wb-ChargingHandle`,
+`wb-foregrip`, `wb-laser`, `wb-StowPoint`, `wb-grenadeLauncher` and
+`wb-coverleft` / `wb-coverright` / `wb-coverbottom`.
+
+**The two most useful are the hand bones.** `[VERIFIED]` `wb-HandRight`
+(`0x1BD2DF4E`) and `wb-HandLeft` (`0x68D6F1C1`) are **authored hand placement
+bones**, present on most weapons, and grip, foregrip and launcher attachments
+supply their own. On one assault rifle the right bone sits on the pistol grip
+and the left 29 cm forward under the handguard. For anyone placing a weapon in
+tracked hands, this is the authored answer to where the hands belong, per
+weapon, and it removes the need to converge those offsets by feel.
+
+`[UNKNOWN]` The routine that resolves a handle to a **world** transform, as
+distinct from the name-to-index resolver described above.
+
 ## HumanIK: present as data only
 
 `[VERIFIED]` HumanIK is statically linked with **names stripped**. No HumanIK

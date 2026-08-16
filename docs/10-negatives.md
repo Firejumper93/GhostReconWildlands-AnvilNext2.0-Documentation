@@ -145,9 +145,104 @@ packed-blob noise. The effector **name tables** are the only anchor.
 
 **The visible projectile is not what resolves the hit.** `[VERIFIED]` Three
 independent interventions each executed on a live field, with counters proving
-they applied, and impacts did not move: relocating the projectile's own position
+they applied, and impacts did not move: relocating the object's own position
 fields, rewriting the spawn direction the spawn function reads, and overriding
 the per-shot aim reader. The decision is upstream of all three.
+
+That negative held, but its **explanation** was wrong for nine days: the object
+being written was `TrailFX`, the cosmetic bullet trail, not the projectile
+component. See [06-weapons.md](06-weapons.md). The useful form of this negative
+is therefore **do not chase the thing you can see the round doing**. The trail
+follows a simulation it does not own, which makes it perfectly steerable and
+completely inert.
+
+> ## RETRACTED IN FULL, 2026-08-16. THERE IS A CAMERA FIRE SOURCE.
+>
+> `[VERIFIED]` `GR_DBWeaponConstants` carries a hybrid shoot system, and one of
+> its two sources is the camera:
+>
+> | Offset | Property |
+> |---|---|
+> | `+0x13C` | `v_bEnableHybridShootSystem` |
+> | `+0x140` | `v_fMinAngleToCancelFocusPoint` |
+> | `+0x144` | **`v_fMinAngleToShootFromCamera`** |
+> | `+0x148` | `d_bDisplayHybridShootSystemDebug` |
+>
+> Every search that missed this missed it for the same reason: **it is not an
+> enum and it is not per-weapon.** It is a bool plus two angle thresholds on a
+> global constants object. A hunt shaped around finding an enum with values like
+> `Camera` and `AlongMuzzle`, which is what the comparable engine ships, could
+> not have found it however wide it was.
+>
+> Note also `d_bDisplayHybridShootSystemDebug`. The engine has a debug
+> visualiser for this system.
+>
+> **The lesson is about the shape of the search, not its size.** The negative
+> below was produced by an exhaustive enumeration of the right kind of thing.
+> The answer was a different kind of thing. Enumerating a category completely
+> tells you nothing about what lives outside the category, and a negative is
+> only as strong as the assumption about where the answer would have to be.
+>
+> The searches described below were all real and all correctly executed. They
+> are left in place because they are still useful as a record of where the
+> answer is not.
+
+**There is no camera-versus-muzzle fire mode ENUM in this engine, and that
+turned out to be the wrong question.** `[VERIFIED NEGATIVE, superseded]` Worth
+stating precisely, because RE Engine
+ships exactly such a flag (`FireBulletType`, `Camera` or `AlongMuzzle`) and
+flipping it is the cheapest possible fix for anyone converting a third-person
+shooter to motion aiming. Anvil does not have one. The search:
+
+- All **1,149 enums** in the game enumerated with value names, via the enum
+  descriptor format in [08-reflection.md](08-reflection.md), then read for
+  camera-versus-muzzle semantics.
+- All **44** authored weapon-statistic types checked. Every one is a magnitude.
+  Not one names a source, an origin or a frame.
+- **2,227,730** generated candidate names run against 11,103 unnamed reflection
+  hashes: 25 hits against 5.76 expected by chance, none a fire-source selector.
+- Zero plaintext hits image-wide for `muzzle`, `bore`, `alongmuzzle`,
+  `fromcamera`, `firefrom`, `shootfrom`, `bullettype`.
+- On disk, archive entries reference the exe schema by CRC32 class hash and
+  serialise values **positionally with no property names**, so a mode flag
+  cannot hide in the data: there would be no descriptor for it to bind to.
+
+The likely reason none exists: `[VERIFIED]` the shoot origin measures at the
+muzzle, and `[INFERRED, weak]` the engine only ever had one answer, which is to
+shoot from `m_MuzzleShootAnchor` toward `m_AimingPointAnchor`, so there is no
+camera mode to switch away from.
+
+**That inference is deliberately tagged weak, and the reason is worth copying.**
+Image-wide, **no function passes both anchors to a common helper**. Every
+pairing of the two that exists is reflection machinery. The final consumer of
+either world-space anchor is a virtual call through an interface subobject at
+`weapon+0x80` with zero rel32 callers and no static edge, so the "muzzle to
+aiming point" story is a plausible reading of two adjacent properties and
+**not** something the code has been shown to do. Given what the rest of this
+chapter documents about plausible readings of adjacent properties in this
+engine, it stays weak until something calls both.
+
+Two false leads, recorded so nobody re-finds them and gets excited:
+`EShootMode` is `{FullAuto, Burst, SingleShot}`, the trigger group.
+`sShootFireAnchor` resolves to a **time-of-day** enum.
+
+**The "sliced ray" damage hypothesis was never real.** `[VERIFIED]` It rested on
+a class that does not exist, produced by fusing
+`DBBallisticSettings_BallisticAssistanceRule` (size `0x20`, three range floats)
+with `BallisticTriggerEvent : Event` (size `0x40`, two segment vectors). The
+first is an **aim assist** tuning struct, sibling to
+`DBBallisticSettings_BulletTrailOverrides`. Neither is per-round simulation
+state.
+
+**The projectile component carries no bullet vector.** `[VERIFIED]` 16 reflected
+records over `0xB0` bytes: no direction, origin, target, segment, range or
+damage float. Bound: about 110 of its bytes are unreflected, so this is a
+negative about authored data, not about runtime memory.
+
+**There is no general anchor system.** `[VERIFIED]` Ten `Anchor` properties
+exist in the whole game, no class is named `*Anchor*`, and no enum contains the
+word. Five of the six spatial ones are `BoneHandle`; the sixth is a raw bone
+ordinal. "Anchor" is a naming convention for a bone reference, not a subsystem.
 
 **The pooled placement subsystem is Havok's**, not a renderer-side bone-gather
 consumer. That line of enquiry is closed.

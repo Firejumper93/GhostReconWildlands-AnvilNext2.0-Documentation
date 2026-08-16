@@ -233,6 +233,76 @@ else will reach them too.
 
 ---
 
+## How to credit this
+
+If this saved you time, the attribution the licence asks for is one line. Use
+whichever fits what you are making.
+
+**In a mod, a tool, or a readme:**
+
+```
+AnvilNext 2.0 engine notes by Firejumper93
+https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation
+CC BY-NC 4.0
+```
+
+**In a source file, where you used a specific finding:**
+
+```c
+// Pose buffer layout: stride 0x20, {float4 T, float4 Q}.
+// Source: Firejumper93, AnvilNext 2.0 documentation, 04-pose.md, CC BY-NC 4.0
+```
+
+**In a video, a post, or a wiki:** the project name and a link. That is enough.
+
+What is asked in return is small and specific: **name the source and link it.**
+Not a logo, not a thank-you screen, not permission requested in advance. If you
+are unsure whether your use counts as commercial, ask rather than guess; the
+answer is usually yes and the terms are usually easy.
+
+### Why this repository asks at all
+
+Every offset in here cost somebody a test cycle, and a meaningful share of them
+cost several, because the first confident answer was wrong. The corrections are
+left in the text on purpose. That record of being wrong in public is the part
+that is genuinely hard to reproduce, and it is the part most worth citing.
+
+---
+
+## Credit where this leaned on other people
+
+Nothing in this repository is copied from the projects below. What they gave was
+harder to come by than code: a named function, a corrected assumption, a method,
+or a negative result that saved a week. Several of them corrected findings here
+that were confidently wrong, and those corrections are marked in the text.
+
+**Draft note, 2026-08-16: this section is not verified for accuracy or
+completeness yet, and no entry here has been contacted or has endorsed anything.
+Check each claim before publishing.**
+
+| Project | What it gave |
+|---|---|
+| [NameTaken3125/ACUFixes](https://github.com/NameTaken3125/ACUFixes) | The single most valuable outside contribution. Names the firearm raycast path on an Anvil title, and establishes that the ray decides the hit. It corrected a probe here that was reading the wrong register entirely: `rdx` is a `World*`, not the ray input. Also independently confirms the reflection record layout on a 2014 title and documents four per-property accessor pointers that a purely static read of a later title reports as absent |
+| [Kamzik123/AnvilToolkit-Resources](https://github.com/Kamzik123/AnvilToolkit-Resources) | The community hash dictionary. On an engine that hides every identifier behind CRC32, a name list is the difference between a struct map and a wall of offsets |
+| [mutars/anvilengine2vr](https://github.com/mutars/anvilengine2vr) | MIT. The reference VR implementation for later Anvil titles, and the template the VR work here was ported from |
+| [Mischa-Alff/broadside](https://github.com/Mischa-Alff/broadside/wiki/AnvilNext-%60.forge%60-file-format) | The `.forge` container format write-up |
+| [gentlegiantJGC/ACExplorer](https://github.com/gentlegiantJGC/ACExplorer), [theawesomecoder61/Blacksmith](https://github.com/theawesomecoder61/Blacksmith), [QuilLeeR/ReForger](https://github.com/QuilLeeR/ReForger), [eprilx/FFDConverter](https://github.com/eprilx/FFDConverter), [RaulMGS/Anvil-UW-Patcher](https://github.com/RaulMGS/Anvil-UW-Patcher) | The Anvil tooling ecosystem. Format details, container handling, and a great deal of prior art that meant several wheels did not need reinventing |
+| [dataterminals/grb-modding-knowledgebase](https://github.com/dataterminals/grb-modding-knowledgebase) | Ghost Recon Breakpoint modding notes, including the bone table that independently cracked two weapon grip bones found here by a different route |
+
+Method, rather than facts, came from outside as well.
+[praydog](https://github.com/praydog)'s REFramework, UEVR and FEAR2VR are the
+clearest published accounts of hunting a shot direction on a closed binary,
+including measured failures with numbers, the reason they failed, and a
+hardware-watchpoint tool built because struct-offset scanning kept producing
+confident wrong answers. [DR-89/fear-vr](https://github.com/DR-89/fear-vr) is a
+well-documented native VR port whose architecture log is worth reading for its
+format alone.
+
+If your work is here and you would rather it were described differently, or not
+listed at all, say so and it will be changed.
+
+---
+
 ## Links and support
 
 - **The VR mod** (releases, installer, issues):
@@ -247,8 +317,16 @@ staring at a disassembler, that is already the point of publishing it.
 
 ## Licence
 
-Notes and prose: **CC BY 4.0**. Attribute and use freely, including in
-commercial work.
+Notes and prose: **CC BY-NC 4.0**. Attribute, share and build on freely.
+**Not for commercial use**, which includes paid mods, paywalled or
+subscription-gated builds, and sold or rented early access.
+
+Two honest limits on that, because the licence protects less than it looks
+like it does. Versions published earlier were **CC BY 4.0** and that grant
+is irrevocable for those versions. And copyright covers the way this is
+WRITTEN, not the facts in it: an offset, a struct layout or a bone name is
+a fact about a program, and anyone may read it here and use it anywhere.
+What the licence stops is copying the text. See LICENSE for the detail.
 
 No game code, game data or third-party code is included or redistributed. Ghost
 Recon, Wildlands, AnvilNext and Anvil are trademarks of Ubisoft Entertainment.

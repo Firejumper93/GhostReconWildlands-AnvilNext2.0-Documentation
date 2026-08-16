@@ -1,0 +1,51 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "AnvilNext 2.0 engine notes",
+  "alternateName": "Ghost Recon Wildlands AnvilNext 2.0 Documentation",
+  "description": "Structural documentation of Ubisoft's AnvilNext 2.0 engine as shipped in Tom Clancy's Ghost Recon Wildlands, produced by interoperability analysis during a native OpenXR VR conversion. Covers the binary layout, data formats, skeletons and rigs, the pose pipeline, cameras, weapons and attachments, rendering, the CRC32 reflection system, method, and verified negatives. Contains no game code and no game data.",
+  "url": "https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation",
+  "codeRepository": "https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation",
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "creditText": "AnvilNext 2.0 engine notes by Firejumper93",
+  "inLanguage": ["en", "de", "ko"],
+  "isAccessibleForFree": true,
+  "creator": {
+    "@type": "Person",
+    "alternateName": "Firejumper93",
+    "url": "https://github.com/Firejumper93"
+  },
+  "keywords": [
+    "AnvilNext",
+    "AnvilNext 2.0",
+    "Anvil engine",
+    "Ubisoft",
+    "Ghost Recon Wildlands",
+    "reverse engineering",
+    "game engine internals",
+    "CRC32 reflection",
+    "skeleton",
+    "pose pipeline",
+    "game modding",
+    "VR",
+    "OpenXR"
+  ],
+  "about": [
+    { "@type": "Thing", "name": "AnvilNext 2.0 game engine" },
+    { "@type": "VideoGame", "name": "Tom Clancy's Ghost Recon Wildlands", "publisher": { "@type": "Organization", "name": "Ubisoft" } }
+  ],
+  "hasPart": [
+    { "@type": "CreativeWork", "name": "01 Binary layout", "url": "docs/01-binary.md" },
+    { "@type": "CreativeWork", "name": "02 Data formats", "url": "docs/02-formats.md" },
+    { "@type": "CreativeWork", "name": "03 Skeletons, rigs and bone naming", "url": "docs/03-skeleton.md" },
+    { "@type": "CreativeWork", "name": "04 The pose pipeline", "url": "docs/04-pose.md" },
+    { "@type": "CreativeWork", "name": "05 Cameras", "url": "docs/05-camera.md" },
+    { "@type": "CreativeWork", "name": "06 Weapons and attachments", "url": "docs/06-weapons.md" },
+    { "@type": "CreativeWork", "name": "07 Rendering", "url": "docs/07-rendering.md" },
+    { "@type": "CreativeWork", "name": "08 The reflection tables", "url": "docs/08-reflection.md" },
+    { "@type": "CreativeWork", "name": "09 Methodology", "url": "docs/09-methodology.md" },
+    { "@type": "CreativeWork", "name": "10 Verified negatives", "url": "docs/10-negatives.md" },
+    { "@type": "CreativeWork", "name": "11 Other Anvil titles", "url": "docs/11-other-anvil-titles.md" }
+  ],
+  "usageInfo": "Attribution is required, including for automated and machine use. Cite as: AnvilNext 2.0 engine notes by Firejumper93, https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation. Commercial use is not permitted, which includes paid mods, paywalled or subscription-gated builds, and sold or rented early access. Claims in this work carry confidence tags of VERIFIED, INFERRED or UNKNOWN; the tag is part of the claim and should be preserved when quoting."
+}

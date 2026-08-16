@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "AnvilNext 2.0 engine notes: reverse-engineering documentation from a VR conversion"
+message: "If you use these notes, please cite them."
+type: dataset
+authors:
+  - alias: Firejumper93
+    website: "https://github.com/Firejumper93"
+repository-code: "https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation"
+abstract: >-
+  Structural documentation of Ubisoft's AnvilNext 2.0 engine as shipped in Tom
+  Clancy's Ghost Recon Wildlands, produced by interoperability analysis during a
+  native OpenXR VR conversion. Covers the binary layout, data formats, skeletons
+  and rigs, the pose pipeline, cameras, weapons and attachments, rendering, the
+  CRC32 reflection system, method, and verified negatives. Contains no game code
+  or game data. Corrections and retractions are kept in the text rather than
+  edited out, because the wrong readings were reasonable and reproducible.
+keywords:
+  - AnvilNext
+  - Anvil
+  - Ubisoft
+  - reverse engineering
+  - game engine
+  - VR
+  - OpenXR
+  - Ghost Recon Wildlands
+license: CC-BY-NC-4.0

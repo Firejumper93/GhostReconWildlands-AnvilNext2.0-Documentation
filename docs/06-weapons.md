@@ -176,6 +176,105 @@ hash `0x1B15F6FA`, descriptor `0x04AF60E0`, size `0x260`:
 which is a useful data point on how stable this engine's data layout is compared
 with its code addresses.
 
+### The shot has two sources, and one of them is the camera
+
+`[VERIFIED]` `GR_DBWeaponConstants` carries a hybrid shoot system:
+
+| Offset | Property |
+|---|---|
+| `+0x13C` | `v_bEnableHybridShootSystem` |
+| `+0x140` | `v_fMinAngleToCancelFocusPoint` |
+| `+0x144` | **`v_fMinAngleToShootFromCamera`** |
+| `+0x148` | `d_bDisplayHybridShootSystemDebug` |
+
+This is a global constants object, not a per-weapon setting, and it is a bool
+plus two angle thresholds rather than an enum. That combination is why it is
+easy to miss: a search shaped around finding a per-weapon fire-source enum, of
+the kind a comparable engine ships, will not find it however thorough it is.
+
+`d_bDisplayHybridShootSystemDebug` implies the engine has a debug visualiser for
+this system, which would be the fastest way to see it working.
+
+`[UNKNOWN]` What the other source is when the angle test fails, what the angle is
+measured between, and where the switch is consumed.
+
+### The weapon skeleton definition
+
+`[VERIFIED]` A single shared database entry named `weapon_skeleton`, of type
+`GR_DBSkeletonDefinitionWeapon`, names the bones the weapon accessors resolve.
+It holds both the bone IDs and their **authored name strings**:
+
+| Offset | Contents |
+|---|---|
+| `+0x20` / `+0x28` | `m_iRootBoneID` / `v_cRootBoneName` |
+| `+0x40` | `m_iWeaponSilencerID` |
+| `+0x60` / `+0x68` | `m_iWeaponMuzzleID` / `v_cWeaponMuzzleName` |
+| `+0x70` / `+0x78` | `m_iWeaponAimingPointID` / `v_cWeaponAimingPointName` |
+| `+0xC0` / `+0xC8` | `m_iMainHandRootBoneID` / its name string |
+| `+0xD0` / `+0xD8` | `m_iSecondHandRootBoneID` / its name string |
+
+Because the names are authored strings rather than hashes, reading this object
+answers "which bone is the sight" and "which bone is the grip" directly, with no
+CRC cracking and no collision risk.
+
+`[VERIFIED]` Two consequences worth knowing before building on the anchors.
+**The unsilenced muzzle anchor and the aiming point resolve to the same bone**,
+so a direction built from one to the other is a zero vector. And the silenced
+muzzle bone exists on **3 of 3,607** weapon assets, all miniguns, so on a
+silenced weapon that lookup cannot succeed.
+
+`[VERIFIED]` The aiming point is **the sight, not the bore**. On one assault
+rifle the bore sits at `z = -0.0628`, the iron sight line at `z = -0.0024`, and
+a fitted optic's aiming point at `z = +0.0377`, so the sight is about 6 cm over
+bore. That offset is a per-weapon authored number, readable offline from the
+weapon's own data file.
+
+### The anchors are bone handles, not vectors. This trips people up.
+
+`[VERIFIED]` `m_GunRootBone`, `m_MuzzleShootAnchor` and `m_AimingPointAnchor`
+sit at `+0xB0`, `+0xC0` and `+0xD0`, a sixteen-byte stride, and they are
+**`BoneHandle`**, not embedded `float4` vectors. The sixteen-byte spacing makes
+them look like three vectors and they are not.
+
+Name and type both come from the descriptor's own fixed fields, nothing by
+adjacency: `crc32("m_MuzzleShootAnchor") == 0x13EF175F` and
+`crc32("BoneHandle") == 0xC11EA419`, both exact, in one record region.
+
+Four independent corroborations, because this is the kind of claim that is
+expensive to get wrong:
+
+1. 21 other properties across the game carry the same type and are named things
+   like `m_GunRootBone` and `m_hFrontWheelSteering`.
+2. The engine has a **separate kind for `float4`** (`kind=0x0D`, 397 records).
+   These are `kind=0x16`.
+3. A sibling field is named `bHadMuzzleShootAnchorCachedWithSilencer`, which
+   only makes sense for a handle that is resolved and cached.
+4. Disassembly shows a sixteen-byte object of this type initialised as
+   `{qword=-1, int32=-1, u16=0xFFFF}`. A `float4` is cleared with `xorps`, not
+   with three integer stores of `-1`.
+
+**Practical consequence: writing sixteen bytes at `weapon+0xC0` repoints the
+handle at a different bone. It does not move the muzzle.** If you want to move
+where a shot starts or where it is aimed, you move the bone, or you change which
+bone the handle names. `+0xE0` `m_AttachmentHolder` is an ordinary eight-byte
+pointer, which brackets the run and confirms where the handles stop.
+
+`[VERIFIED]` **There is no general "anchor system" to reverse engineer.** Ten
+properties in the entire game have `Anchor` in the name, no class is named
+`*Anchor*`, and no enum contains the word. Five of the six spatial ones are
+literally `BoneHandle`; the sixth is a raw bone ordinal. **"Anchor" is this
+engine's naming convention for a bone reference.** So the geometry of a shot is
+bone driven, on the same surface as everything else in `03-skeleton.md`.
+
+`[UNKNOWN]` The internal layout of `BoneHandle`'s three fields, and the routine
+that resolves one to a world transform.
+
+`GR_cSniperAimingLaserComponent` is worth a look for anyone chasing this: it is
+the only component in the game holding both a `BoneHandle`
+(`m_RightEyeAnchor +0x70`) and a full world-space segment (`m_vTrailStart
++0xB0`, `m_vTrailFXDirection +0xC0`, `m_vTrailEnd +0xD0`), so it is a worked
+example of "bone anchor in, segment out". Like `TrailFX`, it is a visual.
+
 `cWeaponAttachmentHolder`, hash `0xECFEF6C0`, size `0xD8`:
 
 | Offset | Slot |
@@ -206,29 +305,87 @@ located.
 
 ## Projectiles
 
-`[VERIFIED]` The bullet is `cBallisticProjectileComponent`, size `0x180`,
-class hash `0x09BFE10E`. The spawn function allocates and fills it, and the
-field names come from the engine's own reflection data:
+> **This section was wrong for nine days, and it is worth reading for the
+> mistake as much as for the facts.** An earlier revision stated that the bullet
+> is `cBallisticProjectileComponent`, size `0x180`, with `m_vBulletShootOrigin`
+> at `+0x50` and `m_vBulletSimulationDirection` at `+0x100`. The class name was
+> correctly recovered and then attached to the wrong memory layout. See
+> `09-methodology.md`, "The closure check", for the one-line test that catches
+> this and for how the error was manufactured.
+
+`[VERIFIED]` **Those fields belong to `TrailFX : ManagedObject`, size `0x180`,
+42 properties. It is the cosmetic bullet trail.**
+
+| Offset | Property |
+|---|---|
+| `+0x28` | `m_fMuzzleVelocity` |
+| `+0x40` | `m_vShootPositionOrigin` |
+| `+0x50` | `m_vBulletShootOrigin` |
+| `+0x68` | `m_ShootEmitterAsWeapon` (`GR_cWeaponComponent*`) |
+| `+0x98..+0xA4` | `m_fTotalDistance`, `m_fCurrentDistance`, `m_fLastDistanceTravelled`, `m_fInstantSpeed` |
+| `+0xA8..+0xAB` | `m_bIsEndReq`, `m_bBulletSimulationCompleted`, `m_bBulletTrailVisible`, `m_bSmokeTrailVisible` |
+| `+0xB0` | `m_vTrailFXPosition` |
+| `+0xC0` | `m_vLastTrailFXPosition` |
+| `+0xD0` | `m_vTrailFXDirection` |
+| `+0xF0` | `m_vBulletSimulationPosition` |
+| `+0x100` | `m_vBulletSimulationDirection` |
+| `+0x118` | `m_eTrailState` |
+| `+0x124` | `m_fCurrentBulletScale` |
+| `+0x130` | `m_vRefDirection` |
+| `+0x170` | `m_bFollowBulletSim` |
+
+`[VERIFIED]` **The real `cBallisticProjectileComponent` is `0xB0` bytes**, class
+hash `0x09BFE10E`, descriptor `0x04AECD90`, base `cAIComponentWithSubComponent`,
+16 reflected records (7 own, 9 inherited). An offset of `+0x100` cannot exist on
+it. Its own properties are `m_ProjectileDBEntry +0x60`, `m_Actor +0x68`,
+`m_bRequestDespawn +0x70`, `m_bAddedInDangerMortarZone +0xA8`, and two unnamed.
+
+**It carries no bullet vector at all**: no direction, no origin, no target
+point, no segment end, no range and no damage float. Across the whole 21,286
+record reflection surface, the only reflected bullet-origin vector in the game
+is `TrailFX +0x50`. Honest bound: roughly 110 of the projectile's bytes are
+unreflected, so this is a negative about **authored data**, not about runtime
+memory.
+
+`[VERIFIED]` The spawn function is real and its disassembly was never in
+question. It allocates `0x180` bytes, which is `TrailFX`'s size:
 
 ```
-movaps xmm1, [owner+0x150]  ->  [proj+0x50]   m_vBulletShootOrigin
-movaps xmm0, [owner+0x140]  ->  [proj+0x100]  m_vBulletSimulationDirection
-mov    [proj+0x20], owner                     back-pointer
+movaps xmm1, [owner+0x150]  ->  [trail+0x50]   m_vBulletShootOrigin
+movaps xmm0, [owner+0x140]  ->  [trail+0x100]  m_vBulletSimulationDirection
+mov    [trail+0x20], owner                     back-pointer
 ```
 
-So **the shot direction is not computed at spawn**; it is read from
-`[owner+0x140]`.
+`[owner+0x140]` and `[owner+0x150]` are a unit direction and an origin on the
+**owner**, and that part stands: the bearing is not computed at this spawn, it
+is copied into the trail from something upstream.
 
-`[VERIFIED NEGATIVE]`, and this is a genuinely useful negative for anyone trying
-to redirect fire: the visible projectile is **not what resolves the hit**. Three
-separate interventions were each proven to execute on a live field, with
-counters showing them applying, and impacts did not move: relocating the
-projectile's own position fields, rewriting the spawn direction at
-`owner+0x140`, and overriding the per-shot aim reader. The decision is made
-somewhere upstream of all three.
+### Why this matters more than the correction
 
-The remaining lead, unresolved: a specific Havok `castRay` caller bursts
-immediately before every projectile spawn and never after.
+`[VERIFIED NEGATIVE]` Three separate interventions were each proven to execute
+on a live field, with counters showing them applying, and impacts did not move:
+relocating the trail's position fields, rewriting `owner+0x140` at spawn, and
+overriding the per-shot aim reader. One of them produced the tell, reported by a
+tester as **the tracer following the new line while the damage stayed on the old
+one**.
+
+With the class corrected, all three collapse into one explanation: **they were
+correct measurements of a cosmetic object.** `m_bFollowBulletSim`, and the
+per-tick overwrite of `m_vBulletSimulationDirection` that defeated every attempt
+to write it, are exactly how a trail that follows a simulation it does not own
+behaves.
+
+The general lesson, and the reason this section is written at length: **"the
+write applied and nothing happened" is evidence about the object, not
+necessarily about the mechanism.** Establish the object's identity before
+concluding the mechanism is wrong.
+
+`[UNKNOWN]` Where damage is actually resolved. Two hypotheses are now retired:
+the visible projectile (this section), and a "sliced ray" reading that turned
+out to fuse two unrelated classes (`09-methodology.md`). A specific Havok
+`castRay` caller bursting immediately before every spawn and never after remains
+unexplained; the RVA recorded for it is build-specific and must be re-derived
+per build.
 
 ## Havok
 

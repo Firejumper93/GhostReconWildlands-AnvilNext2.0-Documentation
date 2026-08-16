@@ -1,41 +1,55 @@
-Creative Commons Attribution 4.0 International (CC BY 4.0)
+Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
 Copyright (c) 2026 Firejumper93
 
-This licence applies to the documentation and prose in this repository.
+This documentation is licensed under the Creative Commons
+Attribution-NonCommercial 4.0 International License.
 
 You are free to:
-
   Share  - copy and redistribute the material in any medium or format
-  Adapt  - remix, transform, and build upon the material for any purpose,
-           including commercially
+  Adapt  - remix, transform, and build upon the material
 
 Under the following terms:
+  Attribution   - You must give appropriate credit, provide a link to the
+                  licence, and indicate if changes were made. You may do so in
+                  any reasonable manner, but not in any way that suggests the
+                  licensor endorses you or your use.
+  NonCommercial - You may not use the material for commercial purposes. This
+                  includes paid mods, paywalled or subscription-gated builds,
+                  and early access sold or rented to users.
 
-  Attribution - You must give appropriate credit, provide a link to this
-  repository, and indicate if changes were made. You may do so in any
-  reasonable manner, but not in any way that suggests the licensor endorses
-  you or your use.
+No additional restrictions - You may not apply legal terms or technological
+measures that legally restrict others from doing anything the licence permits.
 
-  No additional restrictions - You may not apply legal terms or technological
-  measures that legally restrict others from doing anything the licence
-  permits.
+The canonical legal text is at:
+  https://creativecommons.org/licenses/by-nc/4.0/legalcode
+The human-readable summary is at:
+  https://creativecommons.org/licenses/by-nc/4.0/
 
-Full licence text: https://creativecommons.org/licenses/by/4.0/legalcode
+----------------------------------------------------------------------
 
----
+NOTES ON WHAT THIS LICENCE DOES AND DOES NOT DO
 
-NOTICES
+Read these before relying on the licence, because it protects less than it
+looks like it protects.
 
-This repository contains documentation only. It contains no game code, no game
-data, no extracted assets, and no third-party code, and it redistributes none
-of those things.
+1. PRIOR VERSIONS STAY CC BY 4.0. This repository was published under CC BY 4.0,
+   which permits commercial use. That grant is irrevocable for the versions
+   already released under it. This licence binds material published from the
+   change onward; it cannot claw back what was already out.
 
-Ghost Recon, Ghost Recon Wildlands, AnvilNext and Anvil are trademarks of
-Ubisoft Entertainment. This documentation is unofficial, was produced by
-independent interoperability analysis, and is not affiliated with, endorsed by,
-or supported by Ubisoft Entertainment.
+2. FACTS ARE NOT COPYRIGHTABLE. Copyright covers the way this documentation is
+   WRITTEN: its prose, its explanations, the selection and arrangement of its
+   tables. It does not cover the underlying facts. A byte offset, a struct
+   layout, a function signature or a bone name is a fact about a program, and
+   anyone may read it here and use it anywhere, including in a paid mod,
+   whatever this licence says. What the licence stops is copying the text.
 
-The information here is provided as-is, without warranty of any kind. It is
-best-effort reverse engineering and parts of it are certainly inaccurate. See
-the accuracy disclaimer in README.md before relying on any of it.
+3. THIS IS DOCUMENTATION, NOT SOFTWARE. Creative Commons licences are not
+   intended for source code. Any code in this repository, and the VR mod this
+   documentation came from, are covered separately by their own terms.
+
+4. NO GAME CODE OR DATA IS INCLUDED OR REDISTRIBUTED HERE. Ghost Recon,
+   Wildlands, AnvilNext and Anvil are trademarks of Ubisoft Entertainment. This
+   is unofficial documentation produced by interoperability analysis and is not
+   affiliated with or endorsed by Ubisoft.
