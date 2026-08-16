@@ -3,7 +3,8 @@ title: "AnvilNext 2.0 engine notes: reverse-engineering documentation from a VR 
 message: "If you use these notes, please cite them."
 type: dataset
 authors:
-  - alias: Firejumper93
+  - name: "Firejumper93"
+    alias: Firejumper93
     website: "https://github.com/Firejumper93"
 repository-code: "https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation"
 abstract: >-
