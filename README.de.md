@@ -8,6 +8,11 @@
 
 ---
 
+> **Hinweis, 2026-08-16.** Die englische Fassung dieses Kapitels wurde am
+> 2026-08-16 erweitert und enthaelt Korrekturen, die hier noch fehlen.
+> Diese Uebersetzung wird nachgezogen, voraussichtlich am 2026-08-17.
+> Bis dahin ist die [englische Fassung](README.md) massgeblich.
+
 # Ghost Recon Wildlands / AnvilNext 2.0 – Engine-Dokumentation
 
 Reverse-Engineering-Notizen zu Ubisofts AnvilNext 2.0 in der Fassung, die in

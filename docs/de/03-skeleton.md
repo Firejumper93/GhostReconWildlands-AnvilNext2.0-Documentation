@@ -2,6 +2,11 @@
 
 ---
 
+> **Hinweis, 2026-08-16.** Die englische Fassung dieses Kapitels wurde am
+> 2026-08-16 erweitert und enthaelt Korrekturen, die hier noch fehlen.
+> Diese Uebersetzung wird nachgezogen, voraussichtlich am 2026-08-17.
+> Bis dahin ist die [englische Fassung](../03-skeleton.md) massgeblich.
+
 # 03 – Skelette, Rigs und Knochenbenennung
 
 ## Knochenidentität ist überall CRC32

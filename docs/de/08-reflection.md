@@ -2,6 +2,11 @@
 
 ---
 
+> **Hinweis, 2026-08-16.** Die englische Fassung dieses Kapitels wurde am
+> 2026-08-16 erweitert und enthaelt Korrekturen, die hier noch fehlen.
+> Diese Uebersetzung wird nachgezogen, voraussichtlich am 2026-08-17.
+> Bis dahin ist die [englische Fassung](../08-reflection.md) massgeblich.
+
 # 08 – Die Reflection-Tabellen und das Zurückgewinnen von Engine-Namen
 
 Dies ist die wirkungsvollste einzelne Technik bei dieser Engine, daher bekommt
