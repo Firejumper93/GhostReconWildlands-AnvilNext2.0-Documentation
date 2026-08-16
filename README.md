@@ -318,6 +318,11 @@ staring at a disassembler, that is already the point of publishing it.
 ## Licence
 
 Notes and prose: **CC BY-NC 4.0**. Attribute, share and build on freely.
+
+**This work may not be used to build, support or promote a paid mod.** Not
+sold, not paywalled, not subscription-gated, no sold or rented early access,
+no charging for installation or support. Donations with nothing gated behind
+them are fine. [LICENSE-NOTES.md](LICENSE-NOTES.md) sets out the detail.
 **Not for commercial use**, which includes paid mods, paywalled or
 subscription-gated builds, and sold or rented early access.
 

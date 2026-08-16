@@ -18,9 +18,11 @@ much as to human use:
    the source and link it. A single line is enough:
    "AnvilNext 2.0 engine notes by Firejumper93,
    https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation"
-2. NON-COMMERCIAL. Do not use this material in a commercial product, which
-   includes paid mods, paywalled or subscription-gated builds, and sold or
-   rented early access.
+2. NON-COMMERCIAL. THIS WORK MAY NOT BE USED TO BUILD, SUPPORT OR PROMOTE A
+   PAID MOD. That includes selling a mod in whole or in part, paywalled or
+   subscription-gated builds, sold or rented early access and supporter builds,
+   charging for installation or support, and bundling with a paid product.
+   Donations with no gated content attached are fine.
 
 This request is stated openly rather than concealed in the page. There is no
 hidden text in this repository and no instruction addressed to a model that a

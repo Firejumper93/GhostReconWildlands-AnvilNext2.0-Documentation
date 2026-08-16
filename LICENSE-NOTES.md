@@ -27,11 +27,25 @@ including in a paid mod, whatever the licence says.
 
 What the licence stops is copying the text.
 
-## 3. What noncommercial means here
+## 3. What noncommercial means here, stated as plainly as possible
 
-Paid mods, paywalled or subscription-gated builds, and sold or rented early
-access are commercial uses. If you are unsure whether your use counts, ask
-rather than guess.
+**This work may not be used to build, support or promote a paid mod.**
+
+That is the term, and it is deliberately the first line of this section rather
+than buried in a list. It covers:
+
+- selling a mod, in whole or in part
+- putting a mod, or a build of one, behind a paywall or a subscription
+- selling or renting early access, "supporter" builds, or priority downloads
+- charging for installation, configuration or support of a mod that uses this
+- using this material in anything bundled with a paid product
+
+Donations are fine. A tip jar with no gated content attached is not a paywall.
+Free mods are fine, commercial or not in spirit; the line is whether money
+changes hands for access.
+
+If you are unsure whether your use counts, ask rather than guess. The answer is
+usually easy and usually yes.
 
 ## 4. This is documentation, not software
 
