@@ -24,4 +24,15 @@ keywords:
   - VR
   - OpenXR
   - Ghost Recon Wildlands
+  - first person
+  - first-person
+  - first person view
+  - FPV
+  - head camera
+  - head bone camera
+  - camera mod
+  - HumanIK
+  - inverse kinematics
 license: CC-BY-NC-4.0
+version: "2026.08.16"
+date-released: "2026-08-16"

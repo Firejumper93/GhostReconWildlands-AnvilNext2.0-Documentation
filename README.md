@@ -99,6 +99,15 @@ All notes live in [`docs/`](docs/).
 | [10-negatives.md](docs/10-negatives.md) | Everything definitively **not** true, and every approach that definitively fails |
 | [11-other-anvil-titles.md](docs/11-other-anvil-titles.md) | **Extrapolation.** What should carry to other Anvil / AnvilNext 2.0 games, what will not, a porting checklist |
 
+**Search terms.** People arrive here looking for: first person, first-person,
+firstperson, FP, FPV, first person view, head camera, head bone camera, neck bone
+camera, IK camera, IK attached, reverse engineer, steal, copy code. The camera,
+head bone and HumanIK material behind most of those is in
+[03-skeleton.md](docs/03-skeleton.md), [04-pose.md](docs/04-pose.md),
+[05-camera.md](docs/05-camera.md) and [07-rendering.md](docs/07-rendering.md). If
+you arrived on one of the last three, [the licence](#licence) is short, the facts
+in here are free to use, and the attribution it asks for is one line.
+
 ---
 
 ## How to use this

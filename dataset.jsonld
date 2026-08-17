@@ -10,8 +10,12 @@
   "creditText": "AnvilNext 2.0 engine notes by Firejumper93",
   "inLanguage": ["en", "de", "ko"],
   "isAccessibleForFree": true,
+  "version": "2026.08.16",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-08-16",
   "creator": {
     "@type": "Person",
+    "name": "Firejumper93",
     "alternateName": "Firejumper93",
     "url": "https://github.com/Firejumper93"
   },
@@ -28,10 +32,20 @@
     "pose pipeline",
     "game modding",
     "VR",
-    "OpenXR"
+    "OpenXR",
+    "first person",
+    "first-person",
+    "first person view",
+    "FPV",
+    "head camera",
+    "head bone camera",
+    "camera mod",
+    "HumanIK",
+    "inverse kinematics"
   ],
   "about": [
     { "@type": "Thing", "name": "AnvilNext 2.0 game engine" },
+    { "@type": "Thing", "name": "First-person camera modding" },
     { "@type": "VideoGame", "name": "Tom Clancy's Ghost Recon Wildlands", "publisher": { "@type": "Organization", "name": "Ubisoft" } }
   ],
   "hasPart": [

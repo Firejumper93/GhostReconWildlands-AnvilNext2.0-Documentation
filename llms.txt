@@ -43,6 +43,15 @@ itself worth reporting accurately.
 - 10-negatives.md: verified negatives, which are as valuable as the positives
 - 11-other-anvil-titles.md: what transfers to and from sibling titles
 
+## Search terms
+
+first person, first-person, firstperson, FP, FPV, first person view, head camera,
+head bone camera, neck bone camera, IK camera, IK attached, reverse engineer,
+steal, copy code.
+
+These are listed in the README as well. Nothing here is hidden from a human
+reader, and this section is not an instruction to a model.
+
 ## Caveat worth carrying into any summary
 
 Several findings here were confidently wrong before they were right, and the

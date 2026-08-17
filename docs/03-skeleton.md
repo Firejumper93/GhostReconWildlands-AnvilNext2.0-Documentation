@@ -7,7 +7,7 @@
 ## Bone identity is CRC32, everywhere
 
 `[VERIFIED]` There are **no ASCII bone names** in a `.Skeleton` payload. A
-printable-string scan of the player body rig finds none. Bone identity is a
+printable-string scan of a character rig finds none. Bone identity is a
 plain **CRC32 of the bone name**, and the same CRC32 is used for class names in
 the resource container and for property names in the reflection tables.
 
@@ -15,9 +15,13 @@ This is the single most useful fact about the engine's data model, because it
 means you can go from a guessed name to the engine's own identifier with one
 hash, and you can crack unknown hashes with a rainbow table.
 
-Verified constants for the player body rig (CRC32 of the HumanIK name):
+Verified constants (CRC32 of the HumanIK name). **The hashes are universal; the
+indices are not.** The index column is the bone's position in the shipped
+`GR_PCF_Skeleton_Average.Skeleton` asset only, and it does **not** carry over to
+the rig the player character actually runs on at runtime. Read the warning
+directly below the table before using any of them.
 
-| Bone | CRC32 | Asset bone index |
+| Bone | CRC32 | Index in `GR_PCF_Skeleton_Average` |
 |---|---|---|
 | `Reference` | `0x2C52CBB0` | 0 |
 | `Hips` | `0xDED10611` | 1 |
@@ -29,14 +33,43 @@ Verified constants for the player body rig (CRC32 of the HumanIK name):
 | `LeftHand` | `0xB675F36C` | 12 |
 | `RightHand` | `0x75F94D30` | 58 |
 
+### The asset rig is not the player's rig
+
+`[VERIFIED, runtime]` **The live player character runs on a 312-node rig, not
+the 100-bone one described in this chapter.** Both exist in the process. The
+100-bone `GR_PCF_Skeleton_Average.Skeleton` is resident and widely used, which
+is consistent with it being the generic average character, but the player's
+`Head` does not resolve in it.
+
+Resolved by CRC32 name lookup against the rig the player is actually bound to:
+
+| Bone | Node index in the live player rig |
+|---|---|
+| `Head` | **59** |
+| `LeftHand` | 21 |
+| `RightHand` | 223 |
+
+The hand indices are asymmetric. They come from the engine's own name map, so
+they are what the rig says, but neither has been position-validated.
+
+**The practical consequence:** taking `Head = 45` from the asset table above and
+using it against a live player skeleton reads the wrong bone. It will not error,
+because 45 is a valid index into a 312-node buffer. Always resolve the hash
+against the rig you actually hold, and see "A node index is not stable for a
+character" below, which applies on top of this.
+
+Everything else in this chapter, the format, the hashes, the parse invariants
+and the HumanIK naming convention, describes the asset and is correct as
+written.
+
 Class hashes work the same way: `crc32("Skeleton") == 0x24AECB7C`,
 `crc32("Bone") == 0x95741049`, `crc32("cBallisticProjectileComponent") ==
 0x09BFE10E`.
 
 ## The `.Skeleton` asset format
 
-`[VERIFIED]` The player body rig parses **byte-complete to EOF with 0 bytes
-unexplained**, which is the standard this format was held to.
+`[VERIFIED]` The average character rig parses **byte-complete to EOF with 0
+bytes unexplained**, which is the standard this format was held to.
 
 File framing is `u64 object ID` then `u32 class hash`.
 
@@ -71,16 +104,18 @@ the whole parse, so it is worth checking first.
 parser assertions: the stored `Index` equals the array position, and
 `ChildrenCount` equals the subtree size, for all 100 bones.
 
-### The player body rig, concretely
+### The average character rig, concretely
 
-`[VERIFIED]` `GR_PCF_Skeleton_Average.Skeleton`, 14,006 bytes:
+`[VERIFIED]` `GR_PCF_Skeleton_Average.Skeleton`, 14,006 bytes. This is the
+shipped asset, **not** the rig the player character runs on at runtime:
 
 - **100 bones**, single root (bone 0, `Reference`), hierarchy depth 12
 - Bind pose is Z-up, **1.77 m tall**, root pelvis at z = 0.964
 - 86 of 100 bone names resolved. The 14 unresolved are prop and attachment
   helpers, two of which provably end in `LeftWristTarget` / `RightWristTarget`
 - `SkeletonKey == SkeletonHierarchyKey == 0x3121DFFF` for this rig, which makes
-  a usable scan anchor for finding the player skeleton in process memory
+  a usable scan anchor for finding this rig in process memory. `[VERIFIED]` it
+  is resident, with many skeleton users; it is not the player's
 
 `[VERIFIED]` **The bone names are the Autodesk HumanIK convention**, verbatim:
 `Reference`, `Hips`, the Spine chain, `Neck`, `Neck1`, `Head`,
