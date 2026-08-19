@@ -2,6 +2,13 @@
 
 ---
 
+> **Hinweis, 2026-08-19.** Die englische Fassung dieses Kapitels wurde am
+> 2026-08-19 erweitert und enthaelt Abschnitte, die in dieser Uebersetzung
+> noch fehlen. Bis zur Aktualisierung ist die
+> [englische Fassung](../05-camera.md) massgeblich. Ein Termin wird bewusst nicht
+> genannt, da der zuvor zugesagte Termin (2026-08-17) nicht eingehalten
+> wurde.
+
 # 05 – Die Kamera
 
 Alle RVAs in dieser Datei beziehen sich auf den Retail-Build der 2017er-Ära,

@@ -141,6 +141,23 @@ return zero hits across the whole 405 MB string set. The library is statically
 linked with names stripped. The only HIK matches are five data tags plus
 packed-blob noise. The effector **name tables** are the only anchor.
 
+**The HIK datablock-tag paths are protector-mutated. Do not hook them.**
+`[VERIFIED]` (shape) Those code paths carry stack pivots
+(`lea rsp, [rsp-8]` followed by `xchg [rsp]`), not/and/or junk chains, and
+indirect `jmp r14` tails. That is protector output, not compiler output, and it
+is hostile to any detour: the instruction boundaries a hook needs are not stable
+and the tail does not return where a caller expects.
+
+Two caveats on this one, both worth stating rather than burying. The evidence is
+the **shape** of the code, not a crash log from attempting it, so this is a
+strong warning and not a recorded failure. And the two RVAs it was observed at,
+`0x096DBF00` and `0x0C65E600`, are from an **older build** and are not valid on
+the 2026-08 one. Match on the shape, never on those addresses.
+
+This is a local phenomenon, not a property of the whole binary. See
+[01-binary.md](01-binary.md): ordinary engine code on this title disassembles
+cleanly, and it is the runtime that is hostile rather than the file.
+
 ## Weapons and projectiles
 
 **The visible projectile is not what resolves the hit.** `[VERIFIED]` Three
@@ -302,6 +319,63 @@ your own edge detection.
 `[VERIFIED]` Skeleton work runs in the component update stages after the graphic
 phase, so `SkeletonPostUpdate` output in frame N is consumed by the renderer in
 frame N+1.
+
+## Developer scaffolding: what shipped, and what did not
+
+`[VERIFIED, 2026-08 build]` A printable-string census of the retail executable
+settles what developer tooling survived shipping. The negatives are the useful
+half, because each is a thing people assume is in there and go looking for.
+
+**There is no godmode toggle.** The only `GodMode` string in the image is
+`) hpGodMode(`, a field in an anti-cheat telemetry report alongside
+`WatchdogFinalReport`, `Suspects found`, `Tracked players` and `highDamage`. It
+is the game **detecting** godmode in other players, not offering it.
+
+**There is no noclip.** All twenty `Noclip` hits are grass-imposter shader
+permutations (`GrassImposterLowrezNoclip` and relatives). Nothing to do with
+movement.
+
+**There is no developer console.** All forty-five `Console` hits are Win32
+imports (`WriteConsoleW`, `SetConsoleMode`) or first-party friends-list
+networking (`JobLookupFriendsInfoConsole`).
+
+**There is no free camera.** `PlaytimeObserverFreeCamera` and
+`PlaytimeObserverCenteredCamera` sit among analytics field names
+(`NumberOfEmotesUsed`, `PlayerRankedMmr`, `SquadSize`). They record which
+spectator camera a session used. They are not switches.
+
+**`Debug_All` is not a debug toggle.** It is an online-permissions enum value,
+sitting beside `ViewPlayerProfile`, `BlockPlayer` and `AllowedOnlineFeatures`.
+
+### What IS present, which is more than you would expect
+
+Recorded here because the negatives above are only meaningful against it:
+
+- **About 40 debug visualisation shaders are compiled into the shipped
+  renderer**, each carrying the full `<name>` / `g_<name>_size` / `sg_<name>`
+  triple, so they are real compiled permutations rather than leftover names.
+  Among them `DebugShadowTexture`, `DebugTiling`, `DeferredSunLightDebug`, the
+  `GIDebug*` family, `SDSM_DebugHistogram`, `HZBComputeDebug`, `MSSAO2_Debug`
+  and `WorldMapDebug`.
+- **The Havok debug display subsystem is present with RTTI**:
+  `.?AVhkDebugDisplay@@`, `.?AVhkDebugDisplayHandler@@`,
+  `.?AVhkDebugDisplayProcess@@`, `.?AVhkDebugCommandProcessor@@`, plus
+  `$hkDebugDisplay` in a pointer table and the source path
+  `hkDebugDisplayHandler.cpp`. That is Havok Visual Debugger scaffolding.
+- **A named, data-driven config system with display toggles** scoped to cover,
+  edge and vault generation: `displayConfig.coverDisplayDebugTriInfo`,
+  `edgeConfig.simplifiedEdgesDisplay`, seven `contourConfig.*` and thirteen
+  `vaultConfig.*` values, plus a display-mode enum from
+  `SimplEdgesDebug_DispNone` through `DispFinalChains`.
+- `DEBUG_WINDOW`, immediately after `Graphic output` in a table, so a named
+  graphics output target.
+- `storm::log::Level::Debug1` and `Debug2`, log levels above the default.
+
+**The caveat that bounds all of it: this census proves PRESENCE, not
+REACHABILITY.** A compiled shader, an RTTI record and a config key name can all
+ship while the code that reaches them is gated or compiled out. Whether any of
+it can be switched on at runtime is `[UNKNOWN]` and is separate work. Treat the
+list as a map of where to look, not as a list of features you have.
 
 ## Tooling
 

@@ -47,6 +47,83 @@ skips `.edata` as "unidentified data" misses the entire thunk table.
 On the 2026-08 update build the reflection descriptors live in a section named
 `.arch` (`0x040FF000..0x04E38000`).
 
+### The 2026-08 build: the full map, and four ways to waste a session
+
+`[VERIFIED, 2026-08 build, TimeDateStamp 0x6A75F2F4]` That build is 411 MB
+across **17 sections**, and its names lie in different ways from the 2017 one,
+so do not carry the table above across. Measured makeup:
+
+| Section | Raw | Exec | `0xCC` | `00` | Entropy | What it really is |
+|---|---|---|---|---|---|---|
+| `.link` | 324,949,504 | X | 0.3% | 4.0% | 7.10 | **THE ENGINE.** Dense real code |
+| `.reloc` | 59,354,112 | X | **91.3%** | 0.5% | 1.02 | **TRAP.** Thunk stubs in `int3` padding. Executable, looks like code, is not |
+| `.rsrc` | 11,070,976 | - | 0.1% | 64.5% | 2.79 | **INVERSE TRAP.** Two thirds zeros, and holds the reflection metadata |
+| `.xtext` | 8,762,880 | - | 0.1% | 28.1% | 5.52 | non-executable despite the name |
+| `.pdata` | 3,794,432 | - | 0.3% | 1.1% | **7.44** | unwind tables. High entropy is normal here, not encryption |
+| `.tls` | 2,542,592 | - | 0.1% | 10.6% | 6.17 | normal |
+| `.idata` | 553,984 | - | 0.3% | 10.7% | 7.36 | imports |
+| `.edata` | 131,584 | - | 0.0% | **100.0%** | 0.00 | **entirely zero in the file** |
+| `.xtls`, `.rdata`, `.trace` | tiny | X | | | | executable, a few KB each |
+| `.xcode`, `.sdata`, `.srdata`, `.text`, `.data`, `.data1` | tiny | | | | | KB-scale |
+
+**1. Measuring `.reloc` and concluding about the engine.** This one actually
+happened, and it produced a confident, completely inverted strategic
+conclusion: that the binary is "90% `0xCC` filler with hundreds of thousands of
+`E9` thunks into an encrypted blob", therefore static analysis is dead for most
+of the engine and there is no point continuing.
+
+Every number in that sentence was correctly measured. They were measured on
+`.reloc`, which **is** 91.3% `0xCC` and **is** the thunk stub table. `.link`, the
+actual engine, is **0.3%** padding and is not encrypted. The lesson generalises
+past this binary: **check which region a statistic describes before acting on
+it**, because a true measurement of the wrong region reads exactly like a true
+measurement of the right one.
+
+**2. Dismissing `.rsrc` because it is mostly zeros.** It is 64.5% zero *and* it
+is where Anvil keeps its reflection descriptors. The `EngineOptions` flag table
+and the 44-entry HumanIK effector table both live there. A tool that searches
+only `.rdata` and `.data` for tables misses them completely. See
+[08-reflection.md](08-reflection.md).
+
+**3. Searching the file for runtime-only data.** Several sections have virtual
+sizes far above their raw size, and `.edata` is 100% zero on disk. Worked
+example: the input-context manager global at `0x144D884E8` falls outside every
+raw range, so a file scan for its contents finds zeros and proves nothing. It is
+populated only at runtime. See [12-input.md](12-input.md).
+
+**4. Chasing `.pdata`'s entropy.** 7.44 looks like encryption and is packed
+unwind records. Not executable, not interesting.
+
+## Denuvo, EasyAntiCheat, and what is actually analysable
+
+`[VERIFIED, 2026-08 build]` Two protections are commonly assumed on this title.
+They are in different states, and conflating them costs time in both directions.
+
+**EasyAntiCheat is gone.** On the 2026-08 build the `EasyAntiCheat\` directory
+is empty, no EAC file exists anywhere in the install, and a 1 Hz process watch
+that had fired within 20 to 32 seconds on fourteen prior sessions never fired
+across a 78 second session that reached in-world play. Recorded as a dated
+observation of that build, not as a claim about the title in general: an
+earlier build shipped it and a later one may again.
+
+**Denuvo has not gone.** The same build still carries the full protector section
+layout: 411,273,208 bytes, 17 sections, `.link` at 325 MB raw plus `.xtext`,
+`.xcode`, `.xtls` and `.srdata`. Anti-debug behaviour must still be assumed, and
+a string census of the retail image confirms `m_enableDebuggerDetection` exists.
+Treat attaching a debugger as something the process may notice.
+
+**But the mutation is local, not pervasive**, and this is the part that matters
+for anyone who writes the binary off. Engine code inside `.link` disassembles
+linearly with no gaps: roughly 750 bytes of registration code decoded cleanly in
+one sitting. The protector shape does appear, for instance three decode gaps
+immediately after a `ret` at `0x14D161AAD`, but it is localised around specific
+paths rather than spread across the engine.
+
+**So static analysis of engine code is viable on this build. It is the RUNTIME
+that is hostile to instrumentation**, which is the opposite of the intuition
+most people bring to a Denuvo binary. Prefer static derivation, and treat
+runtime attachment as the expensive option rather than the default.
+
 ## Code is plaintext on disk
 
 `[VERIFIED]` Disassembling an export directly out of the file on disk produces

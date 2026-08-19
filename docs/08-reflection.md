@@ -215,6 +215,25 @@ Where the candidate names come from, in order of how much they contributed:
 
 Combined table: **1,616,260 entries.**
 
+### Which SKU you dumped changes what is plaintext
+
+`[VERIFIED]` This one is easy to trip over and produces a false negative that
+looks authoritative.
+
+Anvil reflection names such as `BIPEDBONE_*`, `DisableHumanIK` and `IKData` are
+**present as plaintext in the Ubisoft Store build** of this game and are
+**absent as plaintext from the Steam build**, where the same identifiers exist
+only as CRC32 hashes.
+
+So a name list harvested from one SKU is a genuine dictionary of real engine
+identifiers, and is **not** evidence about what the other SKU contains. If you
+inherit a names file, find out which binary produced it before you cite it, and
+carry that qualifier wherever you use it. The names are real either way; the
+absence of the plaintext is a property of the build, not of the engine.
+
+The practical use is the happy direction: a build that ships the strings is a
+free dictionary for cracking the build that does not.
+
 ### Always carry positive controls
 
 Every cracking run should reproduce facts you already know, in the same run. The

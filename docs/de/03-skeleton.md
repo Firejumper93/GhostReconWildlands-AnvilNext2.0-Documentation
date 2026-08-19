@@ -2,10 +2,12 @@
 
 ---
 
-> **Hinweis, 2026-08-16.** Die englische Fassung dieses Kapitels wurde am
-> 2026-08-16 erweitert und enthaelt Korrekturen, die hier noch fehlen.
-> Diese Uebersetzung wird nachgezogen, voraussichtlich am 2026-08-17.
-> Bis dahin ist die [englische Fassung](../03-skeleton.md) massgeblich.
+> **Hinweis, 2026-08-19.** Die englische Fassung dieses Kapitels wurde am
+> 2026-08-19 erweitert und enthaelt Abschnitte, die in dieser Uebersetzung
+> noch fehlen. Bis zur Aktualisierung ist die
+> [englische Fassung](../03-skeleton.md) massgeblich. Ein Termin wird bewusst nicht
+> genannt, da der zuvor zugesagte Termin (2026-08-17) nicht eingehalten
+> wurde.
 
 # 03 – Skelette, Rigs und Knochenbenennung
 

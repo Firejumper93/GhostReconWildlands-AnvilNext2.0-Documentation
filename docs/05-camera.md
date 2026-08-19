@@ -189,6 +189,24 @@ binary you think you are, because its signature is unique image-wide:
 48 89 E0 53 48 81 EC 90 00 00 00 0F 29 70 E8 48 89 CB F3
 ```
 
+### The near and far planes are not constants
+
+`[VERIFIED]` (values) Do not hardcode the depth range or assume the values you
+sampled once are the values you will see. Across a single fifteen minute session
+on the gameplay camera, the near plane ranged **0.05 to 0.10** and the far plane
+ranged **0.20 to 30000**.
+
+**1200 is the authored and dominant far value, not a constant.** The extremes
+are real and they are reached in ordinary play.
+
+`[UNKNOWN]` which state produces the 30000 far plane. Photo mode, the tactical
+map and the drone were all exercised in that session and the specific
+attribution was not made. If you are writing code that reasons about depth
+precision, the practical consequence is the one that matters and it does not
+depend on knowing which: **the ratio between near and far moves by orders of
+magnitude at runtime**, so any depth-derived calculation with a baked constant
+in it will be correct in normal play and wrong somewhere else.
+
 ## Supporting maths functions, named by their maths
 
 | RVA | What it is | How it was identified |

@@ -354,7 +354,7 @@ weapon, and it removes the need to converge those offsets by feel.
 `[UNKNOWN]` The routine that resolves a handle to a **world** transform, as
 distinct from the name-to-index resolver described above.
 
-## HumanIK: present as data only
+## HumanIK: present, and live
 
 `[VERIFIED]` HumanIK is statically linked with **names stripped**. No HumanIK
 DLL exists anywhere in the install tree, and the data tags are in the executable:
@@ -386,6 +386,80 @@ image.** `HIKSetEffectorStateTQSfv`, `HIKSolveForEffectorSet`,
 return zero hits across the whole 405 MB string set. The only HIK matches are
 those five data tags plus packed-blob noise.
 
-So the solver is reachable only by shape or through the effector name tables.
-Whether its effector interface can be driven from outside is **`[UNKNOWN]`**,
-and the name tables are the anchor to work from if you try.
+So the solver is reachable only by shape or through the effector name tables,
+and the name tables are the anchor to work from.
+
+### Proof it is live, not vestigial middleware
+
+`[VERIFIED, 2026-08 build]` Data tags alone would be consistent with middleware
+that was linked and never used. It is used. There is a **characterization pass**
+at RVA `0x0F947870`, size `0x3CF`, fully unobfuscated, which walks the rig and
+marks bones as HIK-participating.
+
+It consumes three static CRC32 bone-name lists, at `0x03AD16C0` (26 entries),
+`0x03AD1730` (22) and `0x03AD1790` (22, the effector list), and picks between
+them with a **capability probe**: it loads `0xB95094E1`, which is
+`CRC32("LeftToeBase")`, does a bone lookup, and branches on whether this rig has
+that bone. So the engine selects a characterization by rig shape at runtime.
+
+The loop body is the useful part, because it writes the flags this documentation
+describes elsewhere:
+
+```
+mov   edx, [rbx]                   ; CRC32 of the HIK node name
+mov   rcx, r14                     ; the rig
+call  0x00D23D10                   ; -> ax = node index, 0xFFFF means absent
+movzx ecx, ax
+shl   rcx, 4
+add   rcx, [r14 + 0x80]            ; node records, stride 0x10
+or    byte ptr [rcx + 0xA], 8      ; mark this bone as HIK-participating
+                                   ; then append the index to the u16 vector at rig+0xA4
+```
+
+That independently re-confirms the runtime rig layout given earlier in this
+file: node records at `rig+0x80` with stride `0x10`, flags byte at `+0xA` with
+**bit 3 meaning HIK-marked**, and the HIK node list at `rig+0xA4` (data pointer
+at `+0x00`, capacity masked `0x3FFF` at `+0x08`, count `u16` at `+0x0A`).
+
+### Reachability, stated directly
+
+The limb chain is **neither an export nor a virtual call off an object a tool
+already holds**. It is **plain data at fixed offsets inside a component hanging
+off the character**, and every constructor that fills it is unobfuscated and
+signable.
+
+The practical route: signature-scan `0x0B4037A0` or `0x0B402990`, both clean
+prologues, hook read-only, and capture `rcx` together with the `rdx` rig
+pointer. That yields the component pointer for a known character with no
+pointer-chase guessing, which is a far better position than sweeping memory for
+an array by its geometry.
+
+`[UNKNOWN]` The canonical Autodesk 44 by `0x30` effector-state array remains
+unlocated, and repeated searches for that exact shape all failed. The likely
+reason is that they were **hunting the wrong object**: this engine wraps HumanIK
+in its own limb-chain structure rather than exposing the flat 44-entry array to
+gameplay. If you are looking for canonical Autodesk structures here, that is the
+assumption to drop first.
+
+### Whether you should drive it, which is a separate question
+
+`[INFERRED]` Reachable does not mean advisable, and two of the reasons
+generalise beyond this title.
+
+**The quality argument is weaker than it looks.** The engine also ships an
+analytic two-bone solver at `0x0F972810` taking a blend-weight argument, which
+is the same algorithm a hand-written implementation would use. "Drive the
+engine's IK because it is higher quality" is a convenience argument here, not a
+quality one.
+
+**Effector state is solver input, not solver output.** In the Autodesk pipeline
+the solve consumes effector state, so a naive write risks being overwritten on
+the next solve. On this engine the solver sits inside an animation-graph
+dispatcher that may evaluate more than once per tick, which makes the write
+window harder to reason about than a single per-frame ordering would suggest.
+
+The general form of that caution, which applies to any engine: establish whether
+you are writing something the next solve reads, and whether the thing you moved
+is what the game acts on. A change that moves the visible limb without moving
+whatever the gameplay code queries is not the change you wanted, and IK
+subsystems are unusually good at hiding that distinction.
