@@ -98,6 +98,7 @@ All notes live in [`docs/`](docs/).
 | [09-methodology.md](docs/09-methodology.md) | The techniques that worked, in the order they are worth trying |
 | [10-negatives.md](docs/10-negatives.md) | Everything definitively **not** true, and every approach that definitively fails |
 | [11-other-anvil-titles.md](docs/11-other-anvil-titles.md) | **Extrapolation.** What should carry to other Anvil / AnvilNext 2.0 games, what will not, a porting checklist |
+| [12-input.md](docs/12-input.md) | The twelve named input contexts and their offsets, resolving their owner by unique signature, and an unresolved conflict over what the cached values are |
 
 **Search terms.** People arrive here looking for: first person, first-person,
 firstperson, FP, FPV, first person view, head camera, head bone camera, neck bone
