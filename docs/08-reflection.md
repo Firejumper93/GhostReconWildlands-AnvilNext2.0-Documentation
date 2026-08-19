@@ -134,13 +134,65 @@ Property record layout, stride `0x38`:
 | `+0x04` | CRC32 of the property name |
 | `+0x08` | CRC32 of the type name |
 | `+0x0C` | kind |
-| `+0x10` | packed; **byte offset = packed >> 18** |
+| `+0x10` | packed; byte offset is decoded from this, see the correction below |
 
 That last line is the payoff. Once you can name a property, the same record
 hands you its **byte offset inside the object**, so you get a full annotated
 struct layout for free.
 
 (Note the anchoring on this build is +4 from an older convention; check yours.)
+
+> **Corrected 2026-08-19: `packed >> 18` is NOT the offset decode on this
+> build.** That rule is documented above from `ACUFixes` on Assassin's Creed
+> Unity, and it was repeated here on the assumption that it transferred. It does
+> not.
+>
+> On this build the decode is **`(packed & 0xFFFF) >> 3`** on the dword at
+> `record+0x10`.
+>
+> It was caught by a case where the wrong rule is not merely inaccurate but
+> impossible: applied to two adjacent flags in the same table, `packed >> 18`
+> yields **the same offset for both**, and two distinct members cannot share one
+> offset. The correct rule was then verified against three properties whose
+> names are known independently, reproducing member offsets `0x00`, `0x18` and
+> `0x1C`. See the worked example immediately below.
+>
+> Take this as a warning about the cross-title section above it. The record
+> **stride** and the **field roles** did transfer across nine years of Anvil.
+> The **bit packing did not.** Re-derive any packing rule against your own
+> binary using properties you can name independently, and prefer a test case
+> where a wrong rule produces an impossible answer rather than a plausible one.
+
+### Worked example: recovering flags that exist as no string at all
+
+`[VERIFIED, 2026-08-19]` `DisplayIKDebug` and `DisableHumanIK` do not exist as
+plaintext anywhere in the 411 MB image, in ASCII or UTF-16. They exist only as
+CRC32 name hashes inside reflection property descriptors, which is this
+chapter's whole argument compressed into one example.
+
+Owning class `EngineOptions`, class hash `0xB4E69FA1`, base `ManagedObject`,
+instance size `0x88`, descriptor at `0x144485100`. The full 30-flag table runs
+`0x144483610..0x144483CA0`.
+
+| Flag | CRC32 | Record | Member offset |
+|---|---|---|---|
+| `ShowHud` | `0xE0622D50` | `0x144483610` | `0x00` |
+| `DisplayIKDebug` | `0x41A87E75` | `0x144483760` | `0x18` |
+| `DisableHumanIK` | `0x79C7CDCD` | `0x144483798` | `0x1C` |
+
+`zlib.crc32` of each name reproduces the hash exactly, and each hash is present
+little-endian at the claimed record, so the identification is confirmed rather
+than assumed. Four further IK flags fell out of the same table that nobody was
+looking for: `DisplayDebugGroundIK`, `ActivateGroundIK`, `DisplaySkeletonStates`
+and `DisableQuadrupedIK`.
+
+**The caveat that matters before anyone acts on this.** Storage is an instance
+member of a runtime-allocated object, so there is no static address, and
+**whether flipping a flag draws anything is `[UNKNOWN]` and cannot be settled
+statically.** Retail builds routinely keep reflection metadata while compiling
+out the guarded draw path behind it. Gate any attempt on toggling `ShowHud` at
+offset `0x00` first: it is cheap, self-verifying, and it proves the base pointer
+and the offset convention before anyone trusts an IK write.
 
 ## The method: CRC32 rainbow cracking
 
@@ -191,6 +243,153 @@ Concrete examples, all from the tables:
   the projectile for nine days and they are the bullet trail's.)
 - The class-hash-to-name mapping for the resource container: 49 of 50 distinct
   class hashes across 6,563 resources.
+
+## When the dictionary runs out: cracking compound names
+
+`[VERIFIED, 2026-08-19]` The rainbow table above cracks what some dictionary
+already contains. The hard corpus is the one where nothing does.
+
+The archive's own class list is that corpus. `DataPC.forge` uses **770 distinct
+classes**, of which community tooling names about **43**. The other 727 ship as
+a hash with no name anywhere, in the archive or in the executable.
+
+They are still recoverable, because Anvil identifies a class by the **zlib CRC32
+of its ASCII name**, and CRC32 is not a one-way function in any useful sense. So
+naming is a dictionary attack and the only real question is the dictionary.
+Two independent proofs that the identity holds:
+
+```
+crc32("ShootingShapeGeneratorSpecification") == 0xD0471AC3   (a forge class id)
+crc32("DisplayIKDebug")                      == 0x41A87E75   (a reflection flag)
+```
+
+### Why a plaintext sweep is not enough, and the reason points at the answer
+
+Of ten class names known independently, **five occur as plaintext in the
+executable and five do not**. The misses are not random. They are the
+**compounds**, and they are built from tokens that *do* occur on their own:
+
+```
+Build + Table        Texture + Set        Engine + Options
+```
+
+The engine contains the words even when it does not contain the identifier. So
+harvest CamelCase tokens from the image and **recombine** them, rather than
+searching for whole names.
+
+### Frequency ranking is a trap
+
+The obvious optimisation is to rank the token vocabulary by frequency and keep
+the top few thousand. It fails, and it fails specifically because **the tokens
+you need are rare**. On this build, out of a 51,728-token vocabulary:
+
+| Token | Frequency rank |
+|---|---|
+| `Specification` | 7,458 |
+| `Shooting` | 21,638 |
+
+Any sensible cutoff discards exactly what is required. A 3,000-token run scored
+**2 of 5** on a known-answer self-test. The full-vocabulary run scored **5 of
+5**. If you truncate the vocabulary you are optimising away the answer.
+
+### CRC32 reversal is what makes full vocabulary affordable
+
+Enumerating token pairs is `51,728^2`, about **2.7 billion** combinations, which
+is hopeless to hash exhaustively per target.
+
+It is also unnecessary. **zlib's CRC32 byte step is invertible**, because every
+entry in its table has a distinct top byte. So given a target hash and a
+candidate **tail** token, you can compute the **head** hash that would be
+required, and answer it with a single dictionary lookup. Cost per target drops
+from `vocab^2` to `vocab`.
+
+Verified directly: unwinding `Table` from `crc32("BuildTable")` reproduces
+`crc32("Build")` exactly.
+
+### The honest limit, which decides how the output must be used
+
+At full vocabulary the two-token space is around 2.7 billion candidates against
+a **32-bit** hash. So for roughly **half** of random targets, *some* spurious
+pair will collide with the right answer. A tool that reports the first match
+would manufacture confident nonsense at scale, and it would look exactly like
+success.
+
+So the output must be a **shortlist, not an answer**. Collect every candidate
+and rank them by corroboration:
+
+| Signal | Weight |
+|---|---|
+| Token appears as plaintext in the image | +4 |
+| Known Anvil suffix (`Descriptor`, `Specification`, `Template`, ...) | +2 |
+| Common token | +1 |
+
+Self-test on five independently known names: **5 of 5 recovered**, ranked first
+in three cases and third or fourth in the other two, always inside a
+six-candidate shortlist.
+
+**Single-token hits are different and are trustworthy alone.** A 51,728-entry
+space against a 32-bit hash makes a collision roughly a 1-in-84,000 event, so a
+lone one-token match needs no corroboration.
+
+### A sample of the result
+
+These are **proven**, not ranked guesses: `crc32(NAME) == HASH` exactly for
+every row. Resource counts are from the archive's own class census and are given
+to show which classes actually carry the content.
+
+| Class hash | Recovered name | Resources |
+|---|---|---|
+| `0xBC11BD33` | `MissionStepActionPack` | 1,443 |
+| `0xC391C66C` | `GR_SpawnEntityDescriptor` | 1,439 |
+| `0xBC31EF66` | `ConversationExchangeTemplate` | 1,429 |
+| `0xB2C08E53` | `DBLootConfig` | 914 |
+| `0x8A87C2F5` | `DBIntelDescriptor` | 825 |
+| `0x769C0B3F` | `DBCampTag` | 809 |
+| `0x0165AE97` | `XCurve` | 790 |
+| `0xFAC21375` | `DBDriveAIAggressiveness` | 602 |
+| `0xEAE55C42` | `DBGameContext` | 452 |
+| `0x8C5BEF63` | `GR_SpawnNpcDescriptor` | 434 |
+| `0x58B04F9E` | `DBSkillPassive` | 425 |
+| `0xB992756B` | `DBInputActionMappingButton` | 339 |
+
+The `DB` prefix turns out to be the single most productive naming convention in
+the archive, which is itself a dictionary hint: once one `DB*` name is confirmed,
+the prefix becomes a high-value head token for everything else.
+
+Honest note on coverage: the **largest** unnamed class by population,
+`0x36C9CB38` with 2,608 resources, is still unnamed. The long tail is long, and
+the remaining names are the ones no dictionary and no recombination has reached.
+
+### A recovered name is not a recovered meaning
+
+`[VERIFIED, 2026-08-19]` This is the failure mode to plan for, and it cost real
+time here.
+
+`ShootingShapeGeneratorSpecification` is correctly named. The hash matches at
+offset `0x08` of the extracted resource, so the identity is confirmed rather
+than assumed. It reads exactly like the weapon spread table, and it was taken to
+be so.
+
+**It is not.** Strongest evidence first:
+
+- **Exactly one exists.** All ten forges walked, 155,109 entries, 4,964,649
+  resources, two hits and both are the same bytes. Not one per weapon, not one
+  per anything.
+- **No followable link.** All 253 file-id-shaped `u64` values inside it were
+  looked up against every entry and resource id in all ten archives. **One of
+  253** resolved, and it was the resource's own id.
+- Of its 49 serialised objects, the eight "shape" units on a 649-byte stride are
+  byte-identical across the seven comparable ones over 426 consecutive bytes, so
+  that block carries no per-shape information at all.
+
+Editing it could not tell a rifle from a pistol. The real per-weapon data was
+found by searching resource **names** rather than classes, as 60 `Spread_*` and
+102 `Recoil_*` entries under a different class entirely.
+
+**So treat a recovered name as a lead, not a conclusion.** A suggestive
+identifier is evidence about what a class was *called*, not about what it
+*holds*, and this engine has at least one class whose name is a near-perfect
+description of something it does not do.
 
 ## Enums, and how to dump every one of them
 
