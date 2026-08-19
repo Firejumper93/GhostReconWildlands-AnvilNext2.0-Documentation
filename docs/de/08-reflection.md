@@ -2,10 +2,16 @@
 
 ---
 
-> **Hinweis, 2026-08-16.** Die englische Fassung dieses Kapitels wurde am
-> 2026-08-16 erweitert und enthaelt Korrekturen, die hier noch fehlen.
-> Diese Uebersetzung wird nachgezogen, voraussichtlich am 2026-08-17.
-> Bis dahin ist die [englische Fassung](../08-reflection.md) massgeblich.
+> **Hinweis, 2026-08-19. Diese Uebersetzung enthaelt eine Regel, die inzwischen
+> widerlegt ist.** Die hier beschriebene Offset-Dekodierung `packed >> 18` gilt
+> fuer diesen Build NICHT. Sie weist zwei benachbarten Feldern denselben Offset
+> zu, was unmoeglich ist. Richtig ist **`(packed & 0xFFFF) >> 3`**.
+>
+> Die englische Fassung wurde am 2026-08-19 um diese Korrektur und um ein
+> Verfahren zum Knacken zusammengesetzter Namen erweitert. Bis zur
+> Aktualisierung ist die [englische Fassung](../08-reflection.md) massgeblich.
+> Ein Termin wird diesmal bewusst nicht genannt, da der zuvor zugesagte Termin
+> (2026-08-17) nicht eingehalten wurde.
 
 # 08 – Die Reflection-Tabellen und das Zurückgewinnen von Engine-Namen
 
